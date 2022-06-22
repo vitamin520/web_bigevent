@@ -45,7 +45,7 @@ $(function() {
         return layer.msg(res.message)
       }
       layer.msg('注册成功，请登录！')
-      // 模拟人的点击行为
+      // 模拟人的点击行为(是为了注册成功后跳转到登录页面)
       $('#link_login').click()
     })
   })
