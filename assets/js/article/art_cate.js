@@ -19,6 +19,7 @@ $(function() {
   // 为添加类别按钮绑定点击事件
   var indexAdd = null
   $('#btnAddCate').on('click', function() {
+    // 使用layer.open可以弹出一个具体的弹出层
     indexAdd = layer.open({
       type: 1,
       area: ['500px', '250px'],
@@ -27,7 +28,7 @@ $(function() {
     })
   })
 
-  // 通过代理的形式，为 form-add 表单绑定 submit 事件
+  // 通过代理的形式，为 form-add 表单绑定 submit 事件(跟直接绑定不一样)
   $('body').on('submit', '#form-add', function(e) {
     e.preventDefault()
     $.ajax({
@@ -57,7 +58,7 @@ $(function() {
       content: $('#dialog-edit').html()
     })
 
-    var id = $(this).attr('data-id')
+    var id = $(this).attr('data-id');
     // 发起请求获取对应分类的数据
     $.ajax({
       method: 'GET',

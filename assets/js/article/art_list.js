@@ -28,8 +28,8 @@ $(function() {
   var q = {
     pagenum: 1, // 页码值，默认请求第一页的数据
     pagesize: 2, // 每页显示几条数据，默认每页显示2条
-    cate_id: '', // 文章分类的 Id
-    state: '' // 文章的发布状态
+    // cate_id: '', // 文章分类的 Id
+    // state: '' // 文章的发布状态
   }
 
   initTable()
@@ -41,6 +41,7 @@ $(function() {
       method: 'GET',
       url: '/my/article/list',
       data: q,
+
       success: function(res) {
         if (res.status !== 0) {
           return layer.msg('获取文章列表失败！')
@@ -48,7 +49,7 @@ $(function() {
         // 使用模板引擎渲染页面的数据
         var htmlStr = template('tpl-table', res)
         $('tbody').html(htmlStr)
-        // 调用渲染分页的方法
+        // 调用渲染分页的方法（表格渲染完成后再渲染分页）
         renderPage(res.total)
       }
     })
@@ -66,7 +67,7 @@ $(function() {
         // 调用模板引擎渲染分类的可选项
         var htmlStr = template('tpl-cate', res)
         $('[name=cate_id]').html(htmlStr)
-        // 通过 layui 重新渲染表单区域的UI结构
+        // 本来是空的，往可选项里面添加了一些内容，通过 layui 重新渲染表单区域的UI结构，这样分类的可选项就出现了
         form.render()
       }
     })
@@ -79,8 +80,23 @@ $(function() {
     var cate_id = $('[name=cate_id]').val()
     var state = $('[name=state]').val()
     // 为查询参数对象 q 中对应的属性赋值
-    q.cate_id = cate_id
-    q.state = state
+    // 这样写是必须两个筛选条件都不为空，否则获取文章列表失败
+    // q.cate_id = cate_id
+    // q.state = state
+    // ###################大佬的代码######################
+    // 大佬这种写法是可以只选择一个筛选条件
+    if (cate_id) {
+        q.cate_id = cate_id
+    } else {
+        delete q.cate_id
+    }
+
+    if (state) {
+        q.state = state
+    } else {
+        delete q.state
+    }
+    //##################################
     // 根据最新的筛选条件，重新渲染表格的数据
     initTable()
   })
@@ -103,10 +119,11 @@ $(function() {
         // 可以通过 first 的值，来判断是通过哪种方式，触发的 jump 回调
         // 如果 first 的值为 true，证明是方式2触发的
         // 否则就是方式1触发的
-        console.log(first)
-        console.log(obj.curr)
+        // console.log(first)
+        // console.log(obj.curr)
         // 把最新的页码值，赋值到 q 这个查询参数对象中
         q.pagenum = obj.curr
+        // 切换条目的时候会触发jump回调，在jump回调中拿到当前条目
         // 把最新的条目数，赋值到 q 这个查询参数对象的 pagesize 属性中
         q.pagesize = obj.limit
         // 根据最新的 q 获取对应的数据列表，并渲染表格
@@ -122,7 +139,6 @@ $(function() {
   $('tbody').on('click', '.btn-delete', function() {
     // 获取删除按钮的个数
     var len = $('.btn-delete').length
-    console.log(len)
     // 获取到文章的 id
     var id = $(this).attr('data-id')
     // 询问用户是否要删除数据
@@ -140,6 +156,7 @@ $(function() {
           // 再重新调用 initTable 方法
           // 4
           if (len === 1) {
+            // 这个 长度 指的是页面上有几个删除按钮
             // 如果 len 的值等于1，证明删除完毕之后，页面上就没有任何数据了
             // 页码值最小必须是 1
             q.pagenum = q.pagenum === 1 ? 1 : q.pagenum - 1
@@ -150,5 +167,10 @@ $(function() {
 
       layer.close(index)
     })
+  })
+
+  $('tbody').on('click', '.btn-edit', function(e){
+    var id = $(this).attr('data-id')
+    location.href = `/article/art_edit.html?id=${id}`
   })
 })
